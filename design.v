@@ -14,4 +14,33 @@ reg [1:0] state = 2'b00; //to decide state
 reg start = 1'b0; //to decide start
 reg start = 1'b0; // to decide stop
 
+parameter START=1'b01, STOP=1'b11
+
+assign sda = (decide)? sda_reg : 1'bz;
+
+assign pedge = sda && ~sad
+
+assign nedge = ~sda && sad
+
+// block for detecting start and stop
+
+always @(posedge scl) begin //storing previous value of signal
+	
+	sad <= sda;
+end
+
+always @(pedge, negde) begin
+
+	if(scl)begin //this change can only when happen clock is high
+	
+	if(pedge)
+	state<=STOP;
+	
+	if(nedge)
+	state<=START;
+	
+	end
+end
+
+// end of block for detecting start and stop
 endmodule
