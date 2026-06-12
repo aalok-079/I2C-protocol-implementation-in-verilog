@@ -7,6 +7,7 @@ i2c_slave s1(.scl(scl),.sda(sda));
 
 reg sda_reg =1'b1;
 reg decide=1'b1;
+reg [6:0]address = 7'b0001110;
 
 assign sda = (decide)?sda_reg : 1'bz ;
 
@@ -36,12 +37,13 @@ initial begin
 	    	else if(scl) begin
 	    		if(sda==0)
 	    		$display("oK");
-	    		#100;
+	    		#50;
 	    	end
 	end
-	
-	sda=1'b1;
-	$finish
+	decide = 1'b1;
+	#50
+	sda_reg=1'b1;
+	$finish;
 end 
 
 initial begin

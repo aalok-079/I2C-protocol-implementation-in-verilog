@@ -5,24 +5,24 @@ wire pedge,negde; //declared for determining start and stop
 reg sad; //stands for signal after delay used to store value of sda for determining star and stop
 reg [2:0] count_a = 3'b000; //to count address+1 bits in first transaction
 reg [2:0] count_d = 3'b000; //to count data bits 
-reg r_w_bit = 1'b0 //to decide whether to read or write
+reg r_w_bit = 1'b0; //to decide whether to read or write
 reg [6:0] address = 7'b0000000; //to store incoming address
 reg compare = 1'b0; //to compare slave's address with incoming address
 reg decide = 1'b0; //to decide whether sda in input or output line
 reg sda_reg = 1'b1; //register to use when sda is output line
 reg [1:0] state = 2'b00; //to decide state
 reg start = 1'b0; //to decide start
-reg start = 1'b0; // to decide stop
+reg stop = 1'b0; // to decide stop
 
-reg s_add = 7'b0001110
+reg [6:0]s_add = 7'b0001110;
 
-parameter START=1'b01, STOP=1'b11
+parameter START=2'b01, STOP=2'b11, WRITE=2'b00;
 
 assign sda = (decide)? sda_reg : 1'bz;
 
-assign pedge = sda && ~sad
+assign pedge = sda && ~sad;
 
-assign nedge = ~sda && sad
+assign nedge = ~sda && sad;
 
 // block for detecting start and stop
 
@@ -50,7 +50,7 @@ end
 
 always @(scl)begin
 	
-	case(state) begin
+	case(state) 
 	
 		START : begin
 		
@@ -67,7 +67,7 @@ always @(scl)begin
 			count_a <= count_a + 3'b001;
 			r_w_bit <= sda;
 			
-			if(address==s_add) begin
+			if(address&&s_add) begin
 				
 				compare <= 1'b1;
 				decide <= 1'b1;
@@ -82,7 +82,7 @@ always @(scl)begin
 				sda_reg <= 1'b0;
 			
 				if(!r_w_bit)
-					state <= WRITE
+					state <= WRITE;
 			
 			end
 		end
