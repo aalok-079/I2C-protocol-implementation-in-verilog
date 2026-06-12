@@ -65,42 +65,32 @@ always @(scl)begin
 				count_a <= count_a + 4'b0001;
 				address[6-count_a] <= sda;
 			end
-			else begin 
+			else if(count_a == 7)begin 
 				count_a <= count_a + 4'b0001;
 				r_w_bit <= sda;
 				
 				if(address&&s_add) begin
 					compare <= 1'b1;
-					//decide <= 1'b1;
 				end
 			end
-		end
-		/*else if(count_a==7) begin
 			
-			count_a <= count_a + 4'b0001;
-			r_w_bit <= sda;
-			
-			if(address&&s_add) begin
-				
-				compare <= 1'b1;
-				decide <= 1'b1;
-				
+			else begin
+				count_a <= count_a + 4'b0001;
 			end
+		end
 		
-		end */
 		else begin
 			
 			if((!scl)&&(count_a==8)&&compare) begin
 				sda_reg <= 1'b0;
-				count_a <= count_a + 4'b0001;
 				decide <= 1'b1;
-				if(~r_w_bit) begin
-					state <= WRITE;
-					
-					$display("state changed");
-			        end
+				
 			end
 			else if((!scl)&&(count_a==9)) begin
+				if(~r_w_bit) begin
+					state <= WRITE;
+					$display("state changed");
+			        end
 				decide <= 1'b0;
 			end
 		end

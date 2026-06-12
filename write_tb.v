@@ -34,11 +34,11 @@ initial begin
 	    	else if(scl) begin
 	    		if(sda==0)
 	    		$display("oK");
-	    		#75;
+	    		#25;
 	    	end
 	end
 	decide = 1'b1;
-	#50
+	#75
 	sda_reg=1'b1;
 	#125
 	$finish;
