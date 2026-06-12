@@ -1,9 +1,9 @@
 module i2c_slave(input scl, inout sda);
 
-wire pedge,negde; //declared for determining start and stop
+wire pedge,nedge; //declared for determining start and stop
 
 reg sad; //stands for signal after delay used to store value of sda for determining star and stop
-reg [2:0] count_a = 3'b000; //to count address+1 bits in first transaction
+reg [3:0] count_a = 4'b000; //to count address+1 bits in first transaction
 reg [2:0] count_d = 3'b000; //to count data bits 
 reg r_w_bit = 1'b0; //to decide whether to read or write
 reg [6:0] address = 7'b0000000; //to store incoming address
@@ -14,7 +14,7 @@ reg [1:0] state = 2'b00; //to decide state
 reg start = 1'b0; //to decide start
 reg stop = 1'b0; // to decide stop
 
-reg [6:0]s_add = 7'b0001110;
+reg [6:0]s_add = 7'b0101111;
 
 parameter START=2'b01, STOP=2'b11, WRITE=2'b00;
 
@@ -27,19 +27,24 @@ assign nedge = ~sda && sad;
 // block for detecting start and stop
 
 always @(posedge scl) begin //storing previous value of signal
-	
+	$display("0");
 	sad <= sda;
 end
 
-always @(pedge, negde) begin
+always @(pedge, nedge) begin
 
 	if(scl)begin //this change can only when happen clock is high
-	
-	if(pedge)
+	$display("1");
+	if(pedge) begin
 	state<=STOP;
+	stop<=1;
+	end
 	
-	if(nedge)
+	if(nedge) begin
+	$display("1");
 	state<=START;
+	start<=1;
+	end
 	
 	end
 end
@@ -57,14 +62,22 @@ always @(scl)begin
 		if(scl) begin
 		
 			if((count_a>=0) && (count_a<7)) begin
-				count_a <= count_a + 3'b001;
+				count_a <= count_a + 4'b0001;
 				address[6-count_a] <= sda;
 			end
-			
+			else begin 
+				count_a <= count_a + 4'b0001;
+				r_w_bit <= sda;
+				
+				if(address&&s_add) begin
+					compare <= 1'b1;
+					//decide <= 1'b1;
+				end
+			end
 		end
-		else if(count_a==7) begin
+		/*else if(count_a==7) begin
 			
-			count_a <= count_a + 3'b001;
+			count_a <= count_a + 4'b0001;
 			r_w_bit <= sda;
 			
 			if(address&&s_add) begin
@@ -74,16 +87,21 @@ always @(scl)begin
 				
 			end
 		
-		end
+		end */
 		else begin
 			
-			if(!scl) begin
-			
+			if((!scl)&&(count_a==8)&&compare) begin
 				sda_reg <= 1'b0;
-			
-				if(!r_w_bit)
+				count_a <= count_a + 4'b0001;
+				decide <= 1'b1;
+				if(~r_w_bit) begin
 					state <= WRITE;
-			
+					
+					$display("state changed");
+			        end
+			end
+			else if((!scl)&&(count_a==9)) begin
+				decide <= 1'b0;
 			end
 		end
 		
