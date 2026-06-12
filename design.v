@@ -14,6 +14,8 @@ reg [1:0] state = 2'b00; //to decide state
 reg start = 1'b0; //to decide start
 reg start = 1'b0; // to decide stop
 
+reg s_add = 7'b0001110
+
 parameter START=1'b01, STOP=1'b11
 
 assign sda = (decide)? sda_reg : 1'bz;
@@ -43,4 +45,51 @@ always @(pedge, negde) begin
 end
 
 // end of block for detecting start and stop
+
+//START block for storing and comparing address and deciding whether to read ot write
+
+always @(scl)begin
+	
+	case(state) begin
+	
+		START : begin
+		
+		if(scl) begin
+		
+			if((count_a>=0) && (count_a<7)) begin
+				count_a <= count_a + 3'b001;
+				address[6-count_a] <= sda;
+			end
+			
+		end
+		else if(count_a==7) begin
+			
+			count_a <= count_a + 3'b001;
+			r_w_bit <= sda;
+			
+			if(address==s_add) begin
+				
+				compare <= 1'b1;
+				decide <= 1'b1;
+				
+			end
+		
+		end
+		else begin
+			
+			if(!scl) begin
+			
+				sda_reg <= 1'b0;
+			
+				if(!r_w_bit)
+					state <= WRITE
+			
+			end
+		end
+		
+		end
+	
+	endcase
+end
+
 endmodule
