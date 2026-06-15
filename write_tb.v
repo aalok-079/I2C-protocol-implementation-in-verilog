@@ -5,6 +5,7 @@ wire sda; // declaration of sda or data line as wire because it is a inout line
 
 i2c_slave s1(.scl(scl),.sda(sda)); // instantiation of module
 
+reg [7:0] data = 8'b01010101;
 reg sda_reg =1'b1; 
 reg decide=1'b1;
 reg [6:0]address = 7'b0101111;
@@ -38,11 +39,32 @@ initial begin
 	    	end
 	end
 	decide = 1'b1;
-	#75
-	sda_reg=1'b1;
-	#125
+
+	for(integer j=0;j<8;j=j+1) begin
+		if(!scl) begin
+			sda_reg=data[7-j];
+			#101;	
+		end
+	end
+	
+	if(!scl) begin
+		decide =1'b0;
+		#50;
+	end
+		
+	if(scl) begin
+		if(sda==0)
+		$display("ACK");
+	end
+	#50
+	decide =1'b1;
+	sda_reg=1'b0;
+	#50
+	if(scl)
+		sda_reg=1'b1;
+	#125;
 	$finish;
-end 
+end
 
 //block for printing variables on terminal
 initial begin
