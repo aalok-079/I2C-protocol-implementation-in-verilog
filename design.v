@@ -53,7 +53,7 @@ end
 
 //START block for storing and comparing address and deciding whether to read ot write
 
-always @(scl)begin
+always @(posedge scl,negedge scl)begin
 	
 	case(state) 
 	
@@ -112,15 +112,18 @@ always @(scl)begin
 			
 			if((!scl)&&(count_d==8)) begin
 				sda_reg <= 1'b0; //acknowledging
-				decide <= 1'b1;	//changig of sda to input to slave to output from slave
+				decide <= 1'b1;	//changing of sda to input to slave to output from slave
 			end
 			else if((!scl)&&(count_d==9)) begin
 				decide <= 1'b0;
 				sda_reg<=1'b1;
+				count_d<=0;
 			end
 			
 		end
 	        end
+	        
+	        
 		
 	endcase
 end
